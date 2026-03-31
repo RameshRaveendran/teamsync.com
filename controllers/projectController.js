@@ -14,3 +14,11 @@ const createProject = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const getProjects = async (req, res) => {
+  const projects = await Project.find({
+    members: req.user.id
+  });
+
+  res.json(projects);
+};
