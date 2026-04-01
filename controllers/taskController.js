@@ -3,56 +3,66 @@ const Project = require("../models/Project");
 
 // CREATE TASK
 const createTask = async (req, res) => {
-  const { title, projectId, assignedTo, dueDate } = req.body;
+  try {
+    const { title, projectId, assignedTo, dueDate } = req.body;
 
-  const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId);
 
-  if (!project) {
-    return res.status(404).json({ message: "Project not found" });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (!project.members.includes(assignedTo)) {
+      return res.status(400).json({ message: "User not in project" });
+    }
+
+    const task = await Task.create({
+      title,
+      projectId,
+      assignedTo,
+      dueDate
+    });
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  // check member
-  if (!project.members.includes(assignedTo)) {
-    return res.status(400).json({ message: "User not in project" });
-  }
-
-  const task = await Task.create({
-    title,
-    projectId,
-    assignedTo,
-    dueDate
-  });
-
-  res.json(task);
 };
 
-// GET TASKS BY PROJECT
+// GET TASKS
 const getTasks = async (req, res) => {
-  const tasks = await Task.find({ projectId: req.params.projectId })
-    .populate("assignedTo", "name email");
+  try {
+    const tasks = await Task.find({ projectId: req.params.projectId })
+      .populate("assignedTo", "name email");
 
-  res.json(tasks);
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// UPDATE TASK STATUS
+// UPDATE TASK
 const updateTaskStatus = async (req, res) => {
-  const { status } = req.body;
+  try {
+    const { status } = req.body;
 
-  const task = await Task.findById(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-  if (!task) {
-    return res.status(404).json({ message: "Task not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    if (task.assignedTo.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    task.status = status;
+    await task.save();
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  // only assigned user can update
-  if (task.assignedTo.toString() !== req.user.id) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  task.status = status;
-  await task.save();
-
-  res.json(task);
 };
 
 module.exports = {
