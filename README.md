@@ -24,17 +24,41 @@ Security: JWT Authentication, bcrypt password hashing
 Tools: dotenv, nodemon, morgan  
 
 ## 📁 Folder Structure
-teamsync/
-├── config/db.js
-├── controllers/authController.js, projectController.js, taskController.js
-├── models/User.js, Project.js, Task.js
-├── routes/authRoutes.js, projectRoutes.js, taskRoutes.js
-├── middleware/authMiddleware.js
-├── utils/generateToken.js
-├── .env
-├── server.js
+.
+├── config
+│   └── db.js
+├── controllers
+│   ├── authController.js
+│   ├── commentController.js
+│   ├── projectController.js
+│   └── taskController.js
+├── docs
+│   └── postman_collection.json
+├── middleware
+│   ├── authMiddleware.js
+│   ├── errorMiddleware.js
+│   └── roleMiddleware.js
+├── models
+│   ├── Comment.js
+│   ├── Project.js
+│   ├── Task.js
+│   └── User.js
+├── my_project_structure.txt
+├── node_modules
 ├── package.json
-
+├── package-lock.json
+├── README.md
+├── routes
+│   ├── authRoutes.js
+│   ├── commentRoutes.js
+│   ├── projectRoutes.js
+│   └── taskRoutes.js
+├── server.js
+├── utils
+│   ├── generateToken.js
+│   └── hashPassword.js
+└── validations
+    └── validators.js
 ## ⚙️ Installation & Setup
 1. Clone Repository → git clone <your-repo-url> && cd teamsync  
 2. Install Dependencies → npm install  
