@@ -2,7 +2,7 @@ const Task = require("../models/Task");
 const Project = require("../models/Project");
 
 // CREATE TASK
-exports.createTask = async (req, res) => {
+const createTask = async (req, res) => {
   const { title, projectId, assignedTo, dueDate } = req.body;
 
   const project = await Project.findById(projectId);
@@ -27,7 +27,7 @@ exports.createTask = async (req, res) => {
 };
 
 // GET TASKS BY PROJECT
-exports.getTasks = async (req, res) => {
+const getTasks = async (req, res) => {
   const tasks = await Task.find({ projectId: req.params.projectId })
     .populate("assignedTo", "name email");
 
@@ -35,7 +35,7 @@ exports.getTasks = async (req, res) => {
 };
 
 // UPDATE TASK STATUS
-exports.updateTaskStatus = async (req, res) => {
+const updateTaskStatus = async (req, res) => {
   const { status } = req.body;
 
   const task = await Task.findById(req.params.id);
@@ -53,4 +53,10 @@ exports.updateTaskStatus = async (req, res) => {
   await task.save();
 
   res.json(task);
+};
+
+module.exports = {
+  createTask,
+  getTasks,
+  updateTaskStatus
 };
