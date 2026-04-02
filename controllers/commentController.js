@@ -24,3 +24,12 @@ const addComment = async (req, res) => {
 
   res.json(comment);
 };
+
+const getComments = async (req, res) => {
+  const { taskId } = req.params;
+
+  const comments = await Comment.find({ taskId })
+    .populate("userId", "name email");
+
+  res.json(comments);
+};
