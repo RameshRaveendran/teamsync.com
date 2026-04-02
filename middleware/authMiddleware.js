@@ -14,15 +14,13 @@ const protect = (req, res, next) => {
 
       req.user = decoded;
 
-      next();
+      return next();
     } catch (error) {
       return res.status(401).json({ message: "Token failed" });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ message: "No token" });
-  }
+  return res.status(401).json({ message: "No token" });
 };
 
 module.exports = { protect };
