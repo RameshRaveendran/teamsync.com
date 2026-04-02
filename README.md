@@ -1,93 +1,196 @@
 # 🚀 TeamSync (Backend Project Management System)
 
 ## 📌 Description
-TeamSync is a scalable backend system for managing projects, users, and tasks (similar to Jira/Trello). This project is being built step-by-step following industry-level backend architecture. Currently, Phase 1 → Phase 4 are completed: Project setup & server configuration, Authentication system (Register + Login + JWT), Project management system, Task management system.
+TeamSync is a scalable backend system for managing projects, tasks, and team collaboration (similar to Jira/Trello).  
+Built step-by-step following industry-level backend architecture and best practices.
 
-## 🎯 Features Implemented (So Far)
+Currently Completed:
+Phase 1 → Setup  
+Phase 2 → Authentication  
+Phase 3 → Project Management  
+Phase 4 → Task Management  
+Phase 5 → Comment System (Collaboration)
 
-### 🔧 Phase 1: Project Setup
-Express server setup, MongoDB connection using Mongoose, Environment configuration using dotenv, Basic route testing, Clean folder structure.
+---
 
-### 🔐 Phase 2: Authentication System
-User registration, User login, Password hashing using bcrypt, JWT token generation, Protected routes using middleware, Basic error handling.
+## 🎯 Features
 
-### 📁 Phase 3: Project Module
-Create project, Get user-specific projects, Add members to project, Owner-based authorization, Secure project access (only members can view).
+### 🔐 Authentication
+- User Registration
+- User Login
+- Password hashing (bcrypt)
+- JWT-based authentication
+- Protected routes
 
-### 📌 Phase 4: Task Module
-Create tasks inside project, Assign tasks to members, Validate assigned user belongs to project, Fetch tasks by project, Update task status (TODO → IN_PROGRESS → DONE), Only assigned user can update task.
+### 📁 Project Management
+- Create project
+- Get user-specific projects
+- Add members to project
+- Owner-based authorization
+- Only members can access project
+
+### 📌 Task Management
+- Create tasks inside project
+- Assign tasks to members
+- Validate assigned user belongs to project
+- Fetch tasks by project
+- Update task status (TODO → IN_PROGRESS → DONE)
+- Only assigned user can update task
+
+### 💬 Comment System (NEW)
+- Add comments to tasks
+- Fetch comments by task
+- Only project members can comment
+- Linked with users & tasks (relations)
+- Populate user details in comments
+
+---
 
 ## 🧠 Tech Stack
-Backend: Node.js, Express.js  
-Database: MongoDB (Mongoose)  
-Security: JWT Authentication, bcrypt password hashing  
-Tools: dotenv, nodemon, morgan  
+
+**Backend:** Node.js, Express.js  
+**Database:** MongoDB (Mongoose)  
+**Security:** JWT, bcrypt  
+**Tools:** dotenv, nodemon, morgan  
+
+---
 
 ## 📁 Folder Structure
+
+
 .
-├── config
-│   └── db.js
-├── controllers
-│   ├── authController.js
-│   ├── commentController.js
-│   ├── projectController.js
-│   └── taskController.js
-├── docs
-│   └── postman_collection.json
-├── middleware
-│   ├── authMiddleware.js
-│   ├── errorMiddleware.js
-│   └── roleMiddleware.js
-├── models
-│   ├── Comment.js
-│   ├── Project.js
-│   ├── Task.js
-│   └── User.js
-├── my_project_structure.txt
-├── node_modules
-├── package.json
-├── package-lock.json
-├── README.md
-├── routes
-│   ├── authRoutes.js
-│   ├── commentRoutes.js
-│   ├── projectRoutes.js
-│   └── taskRoutes.js
+├── config/
+│ └── db.js
+├── controllers/
+│ ├── authController.js
+│ ├── projectController.js
+│ ├── taskController.js
+│ └── commentController.js
+├── middleware/
+│ ├── authMiddleware.js
+│ ├── errorMiddleware.js
+│ └── roleMiddleware.js
+├── models/
+│ ├── User.js
+│ ├── Project.js
+│ ├── Task.js
+│ └── Comment.js
+├── routes/
+│ ├── authRoutes.js
+│ ├── projectRoutes.js
+│ ├── taskRoutes.js
+│ └── commentRoutes.js
+├── utils/
+│ ├── generateToken.js
+│ └── hashPassword.js
+├── validations/
+│ └── validators.js
+├── docs/
+│ └── postman_collection.json
 ├── server.js
-├── utils
-│   ├── generateToken.js
-│   └── hashPassword.js
-└── validations
-    └── validators.js
+├── package.json
+└── README.md
+
+
+---
+
 ## ⚙️ Installation & Setup
-1. Clone Repository → git clone <your-repo-url> && cd teamsync  
-2. Install Dependencies → npm install  
-3. Setup .env → PORT=5000, MONGO_URI=your_mongodb_url, JWT_SECRET=your_secret_key  
-4. Run Server → npm run dev  
-Server runs on http://localhost:5000
 
-## 🔗 API Endpoints (Implemented)
-AUTH → POST /api/auth/register, POST /api/auth/login  
-PROJECT → POST /api/projects, GET /api/projects, PUT /api/projects/:id/add-member  
-TASK → POST /api/tasks, GET /api/tasks/:projectId, PUT /api/tasks/:id  
+```bash
+git clone <your-repo-url>
+cd teamsync
+npm install
 
-## 🔐 Authorization
+Create .env file:
+
+PORT=5000
+MONGO_URI=your_mongodb_url
+JWT_SECRET=your_secret_key
+
+Run server:
+
+npm run dev
+
+Server runs on:
+👉 http://localhost:5000
+
+🔗 API Endpoints
+AUTH
+
+POST /api/auth/register
+POST /api/auth/login
+
+PROJECT
+
+POST /api/projects
+GET /api/projects
+PUT /api/projects/:id/add-member
+
+TASK
+
+POST /api/tasks
+GET /api/tasks/:projectId
+PUT /api/tasks/:id
+
+COMMENT
+
+POST /api/comments
+GET /api/comments/:taskId
+
+🔐 Authorization
 Authorization: Bearer <token>
+🧠 System Flow
 
-## 🧠 How It Works (Flow)
-User registers → password hashed → user logs in → JWT token generated → client sends token → middleware verifies token → req.user set → user creates project → owner adds members → tasks created inside project → tasks assigned → assigned users update status.
+User registers
+→ Password hashed
+→ User logs in
+→ JWT token generated
+→ Token sent in requests
+→ Middleware verifies token
+→ req.user available
 
-## ⚠️ Edge Cases Handled
-Duplicate user registration, Invalid login credentials, Missing token, Invalid token, User not part of project, Task assigned to non-member, Only owner can add members, Only assigned user can update task.
+Then:
 
-## 🧪 Testing
-Register user → Login → Copy token → Add Authorization header → Create project → Add members → Create task → Fetch tasks → Update task status.
+User creates project
+→ Adds members
+→ Creates tasks
+→ Assigns tasks
+→ Updates task status
+→ Adds comments inside tasks
 
-## 📈 Next Steps (Upcoming Features)
-Comment system (task discussion), Role-based access control, Notifications (Socket.io), Activity logs, File uploads (Cloudinary), Redis caching.
+⚠️ Edge Cases Handled
+Duplicate user registration
+Invalid login credentials
+Missing / invalid token
+User not part of project
+Task assigned to non-member
+Only owner can add members
+Only assigned user can update task
+Only project members can comment
+🧪 Testing Flow (Postman)
+Register user
+Login → Copy token
+Add Authorization header
+Create project
+Add members
+Create task
+Fetch tasks
+Update task status
+Add comment
+Fetch comments
+📈 Next Steps
+Role-Based Access Control (Admin/User)
+Real-time updates (Socket.io)
+Notifications system
+Activity logs
+File uploads (Cloudinary)
+Redis caching
+🧠 Developer Mindset
+Clean architecture
+Scalable backend design
+Secure API development
+Real-world system thinking
+👨‍💻 Author
 
-## 🧠 Developer Mindset
-Clean architecture, Scalable backend design, Security best practices, Real-world API structure, Industry-level thinking.
-
-## 👨‍💻 Author
-Ramesh (Learning Backend Engineering Step-by-Step 🚀)
+Ramesh
+Backend Engineering Journey 🚀
