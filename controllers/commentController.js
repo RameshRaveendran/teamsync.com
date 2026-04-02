@@ -33,3 +33,5 @@ const getComments = async (req, res) => {
 
   res.json(comments);
 };
+
+module.exports = { addComment , getComments};
