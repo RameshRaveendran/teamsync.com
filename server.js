@@ -10,6 +10,9 @@ const app = express();
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const commentRoutes = require("./routes/commentRoutes");
+
+
 
 
 
