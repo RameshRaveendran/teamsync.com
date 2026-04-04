@@ -60,7 +60,6 @@ const addMember = async (req, res) => {
   }
 };
 
-const Project = require("../models/Project");
 
 // 🔥 ONLY ADMIN CAN DELETE
 const deleteProject = async (req, res) => {

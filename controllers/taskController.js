@@ -1,8 +1,6 @@
 const Task = require("../models/Task");
 const Project = require("../models/Project");
 
-// CREATE TASK
-const Task = require("../models/Task");
 
 // 🔥 MANAGER + ADMIN CAN CREATE TASK
 const createTask = async (req, res) => {
