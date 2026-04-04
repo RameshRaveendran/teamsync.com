@@ -1,13 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const projectController = require("../controllers/projectController");
-const { protect } = require("../middleware/authMiddleware");
+const protect = require("../middleware/authMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
 
+const { deleteProject } = require("../controllers/projectController");
 
-
-router.post("/", protect, projectController.createProject);
-router.get("/", protect, projectController.getProjects);
-router.put("/:id/add-member", protect, projectController.addMember);
+// 🔥 ONLY ADMIN
+router.delete("/:id", protect, authorizeRoles("admin"), deleteProject);
 
 module.exports = router;

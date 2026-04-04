@@ -2,32 +2,21 @@ const Task = require("../models/Task");
 const Project = require("../models/Project");
 
 // CREATE TASK
+const Task = require("../models/Task");
+
+// 🔥 MANAGER + ADMIN CAN CREATE TASK
 const createTask = async (req, res) => {
-  try {
-    const { title, projectId, assignedTo, dueDate } = req.body;
+  const task = await Task.create({
+    title: req.body.title,
+    projectId: req.body.projectId,
+    assignedTo: req.body.assignedTo,
+    status: "TODO"
+  });
 
-    const project = await Project.findById(projectId);
-
-    if (!project) {
-      return res.status(404).json({ message: "Project not found" });
-    }
-
-    if (!project.members.includes(assignedTo)) {
-      return res.status(400).json({ message: "User not in project" });
-    }
-
-    const task = await Task.create({
-      title,
-      projectId,
-      assignedTo,
-      dueDate
-    });
-
-    res.json(task);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.json(task);
 };
+
+module.exports = { createTask };
 
 // GET TASKS
 const getTasks = async (req, res) => {
