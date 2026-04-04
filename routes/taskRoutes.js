@@ -1,15 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const taskController = require("../controllers/taskController");
-const { protect } = require("../middleware/authMiddleware");
+const protect = require("../middleware/authMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
 
-// DEBUG CHECK (REMOVE LATER)
-console.log("createTask:", typeof taskController.createTask);
-console.log("protect:", typeof protect);
+const { createTask } = require("../controllers/taskController");
 
-router.post("/", protect, taskController.createTask);
-router.get("/:projectId", protect, taskController.getTasks);
-router.put("/:id", protect, taskController.updateTaskStatus);
+// 🔥 ADMIN + MANAGER
+router.post("/", protect, authorizeRoles("admin", "manager"), createTask);
 
 module.exports = router;
