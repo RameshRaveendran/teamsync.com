@@ -1,57 +1,25 @@
-// ======================
-// 🔹 IMPORT
-// ======================
-const jwt = require("jsonwebtoken"); 
-// JWT library → token verify ചെയ്യാൻ
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-// ======================
-// 🔹 MIDDLEWARE FUNCTION
-// ======================
-const protect = (req, res, next) => {
-  let token;
+const protect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-  // ======================
-  // 🔹 CHECK HEADER
-  // ======================
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    // Authorization: Bearer <token>
-    token = req.headers.authorization.split(" ")[1];
-    // "Bearer abc123" → ["Bearer", "abc123"]
-
-    try {
-      // ======================
-      // 🔹 VERIFY TOKEN
-      // ======================
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // token valid ആണോ എന്ന് check ചെയ്യുന്നു
-
-      // ======================
-      // 🔹 ATTACH USER
-      // ======================
-      req.user = decoded;
-      // user data request ലേക്ക് attach ചെയ്യുന്നു
-
-      return next();
-      // അടുത്ത middleware / controller ലേക്ക് പോകുന്നു
-
-    } catch (error) {
-      // ======================
-      // 🔹 TOKEN ERROR
-      // ======================
-      return res.status(401).json({ message: "Token failed" });
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+      return res.status(401).json({ message: "Not authorized" });
     }
-  }
 
-  // ======================
-  // 🔹 NO TOKEN
-  // ======================
-  return res.status(401).json({ message: "No token" });
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 🔥 attach full user
+    req.user = await User.findById(decoded.id).select("-password");
+
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
 };
 
-// ======================
-// 🔹 EXPORT
-// ======================
-module.exports = { protect };
+module.exports = protect;
