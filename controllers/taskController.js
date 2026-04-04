@@ -1,5 +1,5 @@
 const Task = require("../models/Task");
-const Project = require("../models/Project");
+const {Project} = require("../models/Project");
 
 
 // 🔥 MANAGER + ADMIN CAN CREATE TASK
