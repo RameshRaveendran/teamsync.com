@@ -60,8 +60,26 @@ const addMember = async (req, res) => {
   }
 };
 
+const Project = require("../models/Project");
+
+// 🔥 ONLY ADMIN CAN DELETE
+const deleteProject = async (req, res) => {
+  const project = await Project.findById(req.params.id);
+
+  if (!project) {
+    return res.status(404).json({ message: "Project not found" });
+  }
+
+  await project.deleteOne();
+
+  res.json({ message: "Project deleted successfully" });
+};
+
+
+
 module.exports = {
   createProject,
   getProjects,
-  addMember
+  addMember,
+  deleteProject
 };
