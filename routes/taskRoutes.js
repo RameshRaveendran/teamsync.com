@@ -7,6 +7,9 @@ const {authorizeRoles} = require("../middleware/roleMiddleware");
 const { createTask } = require("../controllers/taskController");
 
 // 🔥 ADMIN + MANAGER
-router.post("/", protect, authorizeRoles("admin", "manager"), createTask);
+router.post("/", 
+    protect, 
+    authorizeRoles("admin", "manager"), 
+    createTask);
 
 module.exports = router;
