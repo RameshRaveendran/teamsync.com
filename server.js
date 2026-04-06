@@ -70,6 +70,11 @@ app.use("/api/tasks", taskRoutes);
 
 app.use("/api/comments", commentRoutes);
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // ======================
 // 🔹 HEALTH CHECK ROUTE
 // ======================
