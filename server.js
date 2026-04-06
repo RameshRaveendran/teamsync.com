@@ -61,6 +61,7 @@ const authRoutes = require("./routes/authRoutes"); // Auth (login/register)
 const projectRoutes = require("./routes/projectRoutes"); // Projects CRUD
 const taskRoutes = require("./routes/taskRoutes"); // Tasks CRUD
 const commentRoutes = require("./routes/commentRoutes"); // Comments system
+const errorHandler = require("./middleware/errorMiddleware"); // Error handling
 
 // ======================
 // 🔹 GLOBAL MIDDLEWARE
@@ -95,6 +96,11 @@ app.get("/", (req, res) => {
   res.send("TeamSync API Running");
 });
 // Server working ആണോ എന്ന് test ചെയ്യാൻ
+
+// ======================
+// 🔹 ERROR MIDDLEWARE (Must be last!)
+// ======================
+app.use(errorHandler);
 
 // ======================
 // 🔹 PORT CONFIG
