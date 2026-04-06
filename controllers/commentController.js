@@ -33,10 +33,13 @@ const addComment = async (req, res) => {
     text
   });
 
-  // 🔥 Emit event
-  req.io.emit("newComment", comment);
+  // 🔥 Populate user info for socket event
+  const populatedComment = await comment.populate("userId", "name email");
 
-  res.json(comment);
+  // ✅ Emit only to users subscribed to this task's room
+  req.io.to(`task-${taskId}`).emit("newComment", populatedComment);
+
+  res.json(populatedComment);
 };
 
 const getComments = async (req, res) => {

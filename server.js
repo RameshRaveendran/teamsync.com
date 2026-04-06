@@ -37,8 +37,20 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // ✅ NEW: Join task room
+  socket.on("joinTask", (taskId) => {
+    console.log(`User ${socket.id} joined task room: task-${taskId}`);
+    socket.join(`task-${taskId}`); 
+  });
+
+  // ✅ NEW: Leave task room
+  socket.on("leaveTask", (taskId) => {
+    console.log(`User ${socket.id} left task room: task-${taskId}`);
+    socket.leave(`task-${taskId}`);
+  });
+
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    console.log("User disconnected:", socket.id);
   });
 });
 
@@ -57,6 +69,12 @@ app.use(express.json());
 // JSON request body → JS object ആക്കുന്നു
 // ഇല്ലെങ്കിൽ req.body undefined ആയിരിക്കും
 
+// ⚠️ ATTACH IO TO REQUEST (before routes)
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // ======================
 // 🔹 ROUTE MOUNTING
 // ======================
@@ -69,11 +87,6 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
 app.use("/api/comments", commentRoutes);
-
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 // ======================
 // 🔹 HEALTH CHECK ROUTE
@@ -93,7 +106,8 @@ const PORT = process.env.PORT || 5000;
 // ======================
 // 🔹 SERVER START
 // ======================
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Socket.IO ready for connections`);
 });
-// Server start ചെയ്യുന്നു
+// Server start ചെയ്യുന്നു via HTTP server (required for Socket.IO)
