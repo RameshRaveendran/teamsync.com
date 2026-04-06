@@ -1,9 +1,11 @@
 // ======================
 // 🔹 IMPORTS (Modules)
 // ======================
+const http = require("http");
 const express = require("express"); // Framework → server create ചെയ്യാൻ
 const dotenv = require("dotenv"); // Environment variables load ചെയ്യാൻ
 const connectDB = require("./config/db"); // Database connection function
+const { Server } = require("socket.io");
 
 // ======================
 // 🔹 CONFIG SETUP
@@ -19,6 +21,26 @@ connectDB(); // MongoDB connect ചെയ്യുന്നു
 // 🔹 APP INIT
 // ======================
 const app = express(); // Express server instance create ചെയ്യുന്നു
+
+// ======================
+// 🔹 SOCKET.IO UPDATES
+// ======================
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
 
 // ======================
 // 🔹 ROUTE MODULES
