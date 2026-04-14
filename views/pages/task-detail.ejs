@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Detail - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('../partials/sidebar') %>
+    
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+      
+      <div class="content">
+        <div class="breadcrumb">
+          <a href="/tasks">Tasks</a> / <span id="taskTitle">Task</span>
+        </div>
+
+        <div class="page-header">
+          <div>
+            <h1 id="taskTitleHead">Loading...</h1>
+            <p id="taskProject">Project: Loading...</p>
+          </div>
+          <div class="header-actions">
+            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+              <button id="editBtn" class="btn btn-secondary">✎ Edit</button>
+              <button id="deleteBtn" class="btn btn-danger">🗑 Delete</button>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="task-detail-container">
+          <!-- Task Info -->
+          <div class="detail-section">
+            <h2>📋 Task Information</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Status</label>
+                <p id="taskStatus">Loading...</p>
+              </div>
+              <div class="info-item">
+                <label>Assigned To</label>
+                <p id="taskAssignedTo">Loading...</p>
+              </div>
+              <div class="info-item">
+                <label>Due Date</label>
+                <p id="taskDueDate">Loading...</p>
+              </div>
+              <div class="info-item">
+                <label>Created</label>
+                <p id="taskCreated">Loading...</p>
+              </div>
+            </div>
+
+            <div class="info-item full-width">
+              <label>Description</label>
+              <p id="taskDesc" class="info-value">Loading...</p>
+            </div>
+
+            <div class="quick-actions">
+              <label>Update Status:</label>
+              <select id="statusSelect">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="detail-section">
+            <div class="section-header">
+              <h2>💬 Comments</h2>
+            </div>
+
+            <div id="commentsContainer" class="comments-list">
+              <p>Loading comments...</p>
+            </div>
+
+            <div class="comment-form">
+              <form id="commentForm">
+                <textarea id="commentText" placeholder="Add a comment..." rows="3" required></textarea>
+                <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const taskId = '<%= taskId %>';
+    const user = getUser();
+    let task = null;
+
+    const loadTaskDetails = async () => {
+      try {
+        task = await api.getTask(taskId);
+
+        // Update header
+        document.getElementById('taskTitle').textContent = task.title;
+        document.getElementById('taskTitleHead').textContent = task.title;
+        document.getElementById('taskProject').textContent = `Project: ${task.project?.title || 'N/A'}`;
+
+        // Update info
+        document.getElementById('taskStatus').innerHTML = `<span class="badge badge-${task.status.toLowerCase()}">${task.status}</span>`;
+        document.getElementById('taskAssignedTo').textContent = task.assignedTo?.name || 'Unassigned';
+        document.getElementById('taskDueDate').textContent = task.dueDate ? formatDate(task.dueDate) : 'No due date';
+        document.getElementById('taskCreated').textContent = formatDate(task.createdAt);
+        document.getElementById('taskDesc').textContent = task.description || 'No description';
+
+        // Set status select
+        document.getElementById('statusSelect').value = task.status;
+
+        // Load comments
+        loadComments();
+
+      } catch (error) {
+        showError(error);
+      }
+    };
+
+    const loadComments = async () => {
+      try {
+        const comments = await api.getComments(taskId);
+        const container = document.getElementById('commentsContainer');
+
+        if (comments.length === 0) {
+          container.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+          return;
+        }
+
+        container.innerHTML = comments.map(comment => `
+          <div class="comment">
+            <div class="comment-header">
+              <strong>${comment.user?.name || 'Unknown'}</strong>
+              <small>${formatDate(comment.createdAt)}</small>
+            </div>
+            <p class="comment-text">${comment.text}</p>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Error loading comments:', error);
+      }
+    };
+
+    // Status update
+    document.getElementById('statusSelect').addEventListener('change', async (e) => {
+      try {
+        await api.updateTaskStatus(taskId, e.target.value);
+        loadTaskDetails();
+      } catch (error) {
+        showError(error);
+      }
+    });
+
+    // Delete task
+    document.getElementById('deleteBtn')?.addEventListener('click', async () => {
+      if (confirm('Delete this task? This cannot be undone.')) {
+        try {
+          await api.deleteTask(taskId);
+          showAlert('Task deleted!', 'success');
+          setTimeout(() => {
+            window.location.href = '/tasks';
+          }, 1000);
+        } catch (error) {
+          showError(error);
+        }
+      }
+    });
+
+    // Add comment
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      try {
+        const text = document.getElementById('commentText').value;
+        await api.addComment(taskId, text);
+        document.getElementById('commentText').value = '';
+        loadComments();
+      } catch (error) {
+        showError(error);
+      }
+    });
+
+    loadTaskDetails();
+
+    // Reload comments every 10 seconds
+    setInterval(loadComments, 10000);
+  </script>
+
+  <style>
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .comment {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid #007bff;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .comment-header small {
+      color: #999;
+    }
+
+    .comment-text {
+      margin: 0;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .comment-form {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .quick-actions {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .quick-actions select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</body>
+</html>
