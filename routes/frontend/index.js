@@ -3,9 +3,9 @@
 // ============================================
 
 const express = require('express');
-const authController = require('../controllers/frontend/authController');
-const pageController = require('../controllers/frontend/pageController');
-const resourceController = require('../controllers/frontend/resourceController');
+const authController = require('../../controllers/frontend/authController');
+const pageController = require('../../controllers/frontend/pageController');
+const resourceController = require('../../controllers/frontend/resourceController');
 
 const router = express.Router();
 
