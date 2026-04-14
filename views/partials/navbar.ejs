@@ -1,0 +1,54 @@
+<!-- 🔹 NAVBAR -->
+<div class="navbar">
+  <div>
+    <h2 style="font-size: 14px; color: #6b7280;">
+      <% if (typeof pageTitle !== 'undefined') { %>
+        <%= pageTitle %>
+      <% } else { %>
+        Dashboard
+      <% } %>
+    </h2>
+  </div>
+
+  <div class="user-profile">
+    <div>
+      <p style="font-size: 14px; margin-bottom: 2px;">
+        <strong><%= user ? user.name : 'Guest' %></strong>
+      </p>
+      <p style="font-size: 12px; color: #6b7280;">
+        <%= user && user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member' %>
+      </p>
+    </div>
+    
+    <div class="user-avatar" title="<%= user ? user.name : 'User' %>">
+      <%= user ? getInitials(user.name) : 'U' %>
+    </div>
+
+    <div class="dropdown-menu">
+      <button id="dropdownBtn" style="cursor: pointer;">⋮</button>
+      <div id="dropdownContent" class="dropdown-content">
+        <a href="/profile">👤 Profile</a>
+        <a href="/notifications">🔔 Notifications</a>
+        <button onclick="logout()" style="border: none; background: none; color: #ef4444; padding: 12px 15px; width: 100%; text-align: left; cursor: pointer;">🚪 Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getInitials(name) {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+  }
+</script>

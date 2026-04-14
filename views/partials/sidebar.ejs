@@ -1,0 +1,54 @@
+<!-- 🔹 SIDEBAR -->
+<div class="sidebar">
+  <div style="flex: 1;">
+    <div class="sidebar-brand">
+      Team<span>Sync</span>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li>
+        <a href="/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+          📊 Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">
+          📁 Projects
+        </a>
+      </li>
+      <li>
+        <a href="/tasks" class="<%= currentPage === 'tasks' ? 'active' : '' %>">
+          ✓ My Tasks
+        </a>
+      </li>
+      <li>
+        <a href="/notifications" class="<%= currentPage === 'notifications' ? 'active' : '' %>">
+          🔔 Notifications
+        </a>
+      </li>
+      <li>
+        <a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">
+          👤 Profile
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="/about">ℹ️ About</a>
+    <a href="/help">❓ Help</a>
+    <button onclick="logout()" style="background: none; border: none; color: #ef4444; padding: 8px 0; width: 100%; text-align: left; cursor: pointer; font-size: 14px;">
+      🚪 Logout
+    </button>
+  </div>
+</div>
+
+<script>
+  function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+  }
+</script>

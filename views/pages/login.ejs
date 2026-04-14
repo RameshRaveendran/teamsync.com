@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-title">
+        <h1>🔐 Login</h1>
+        <p>Welcome back to TeamSync</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          Login to Account
+        </button>
+      </form>
+
+      <div class="auth-link">
+        Don't have an account? 
+        <a href="/register">Create one now</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    redirectIfAuth();
+
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        showLoading(form.querySelector('button'));
+
+        const response = await api.login(emailInput.value, passwordInput.value);
+        
+        // Save token and user
+        api.setToken(response.token);
+        setUser(response);
+
+        showAlert('Login successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+
+      } catch (error) {
+        showError(error);
+        hideLoading(form.querySelector('button'));
+      }
+    });
+  </script>
+</body>
+</html>
