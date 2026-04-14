@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid rgba(59, 130, 246, 0.1);
+      border-radius: 50%;
+      border-top: 3px solid #3b82f6;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .sidebar-footer {
+      position: relative;
+      bottom: auto;
+      width: 100%;
+      padding: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- 🔹 SIDEBAR -->
+    <%- include('./partials/sidebar') %>
+
+    <!-- 🔹 MAIN CONTENT -->
+    <div class="main-content">
+      <!-- 🔹 NAVBAR -->
+      <%- include('./partials/navbar') %>
+
+      <!-- 🔹 CONTENT -->
+      <div class="content">
+        <%- body %>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <% if (typeof scripts !== 'undefined') { %>
+    <% scripts.forEach(script => { %>
+      <script src="/js/<%= script %>"></script>
+    <% }); %>
+  <% } %>
+</body>
+</html>
