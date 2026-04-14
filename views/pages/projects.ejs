@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('../partials/sidebar') %>
+    
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+      
+      <div class="content">
+        <div class="page-header">
+          <h1>📁 Projects</h1>
+          <p>Manage all your projects</p>
+        </div>
+
+        <div class="section-header" style="margin-bottom: 20px;">
+          <input type="text" id="searchInput" placeholder="🔍 Search projects..." class="search-input">
+          <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+            <a href="/project/create" class="btn btn-primary">+ New Project</a>
+          <% } %>
+        </div>
+
+        <div id="projectsContainer" class="projects-grid">
+          <div class="loading-skeleton"></div>
+          <div class="loading-skeleton"></div>
+          <div class="loading-skeleton"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const user = getUser();
+    let allProjects = [];
+
+    const loadProjects = async () => {
+      try {
+        allProjects = await api.getProjects();
+        displayProjects(allProjects);
+      } catch (error) {
+        showError(error);
+      }
+    };
+
+    const displayProjects = (projects) => {
+      const container = document.getElementById('projectsContainer');
+
+      if (projects.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>No projects found</h3>
+            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+              <a href="/project/create" class="btn btn-primary">Create First Project</a>
+            <% } %>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = projects.map(project => `
+        <div class="project-card project-card-full">
+          <div class="card-header">
+            <h3>${project.title}</h3>
+            <div class="card-actions">
+              <span class="badge badge-${project.status.toLowerCase()}">${project.status}</span>
+              <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                <a href="/project/${project._id}/edit" class="btn btn-xs btn-secondary">Edit</a>
+              <% } %>
+            </div>
+          </div>
+
+          <p class="card-desc">${project.description || 'No description'}</p>
+
+          <div class="project-stats">
+            <div class="stat">
+              <span class="stat-label">Members</span>
+              <span class="stat-value">${project.members?.length || 0}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Tasks</span>
+              <span class="stat-value">${project.tasks?.length || 0}</span>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <small>Created ${formatDate(project.createdAt)}</small>
+            <a href="/project/${project._id}" class="btn btn-sm btn-primary">View Details</a>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allProjects.filter(p => 
+        p.title.toLowerCase().includes(query) || 
+        (p.description && p.description.toLowerCase().includes(query))
+      );
+      displayProjects(filtered);
+    });
+
+    loadProjects();
+  </script>
+</body>
+</html>

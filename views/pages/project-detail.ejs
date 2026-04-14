@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('../partials/sidebar') %>
+    
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+      
+      <div class="content">
+        <div class="breadcrumb">
+          <a href="/projects">Projects</a> / <span id="projectTitle">Project</span>
+        </div>
+
+        <div class="page-header">
+          <div>
+            <h1 id="projectTitle2">Loading...</h1>
+            <p id="projectStatus">Status loading...</p>
+          </div>
+          <div class="header-actions">
+            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+              <a href="#" id="editBtn" class="btn btn-secondary">✎ Edit</a>
+              <button id="deleteBtn" class="btn btn-danger">🗑 Delete</button>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="project-details-container">
+          <!-- Project Info -->
+          <div class="detail-section">
+            <h2>📋 Project Information</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Description</label>
+                <p id="projectDesc" class="info-value">Loading...</p>
+              </div>
+              <div class="info-item">
+                <label>Created</label>
+                <p id="projectCreated" class="info-value">Loading...</p>
+              </div>
+              <div class="info-item">
+                <label>Created By</label>
+                <p id="projectCreatedBy" class="info-value">Loading...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks Section -->
+          <div class="detail-section">
+            <div class="section-header">
+              <h2>✅ Tasks</h2>
+              <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                <button id="createTaskBtn" class="btn btn-sm btn-primary">+ Add Task</button>
+              <% } %>
+            </div>
+
+            <div id="tasksContainer" class="tasks-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Due</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tasksBody">
+                  <tr>
+                    <td colspan="5" class="text-center">Loading tasks...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Members Section -->
+          <div class="detail-section">
+            <div class="section-header">
+              <h2>👥 Team Members</h2>
+              <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+                <button id="addMemberBtn" class="btn btn-sm btn-primary">+ Add Member</button>
+              <% } %>
+            </div>
+
+            <div id="membersContainer" class="members-grid">
+              <p>Loading members...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Task Modal -->
+  <div id="taskModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Task</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="taskForm">
+        <div class="form-group">
+          <label for="taskTitle">Task Title</label>
+          <input type="text" id="taskTitle" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="taskDesc">Description</label>
+          <textarea id="taskDesc" name="description" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskAssigned">Assign To</label>
+            <select id="taskAssigned" name="assignedTo"></select>
+          </div>
+          <div class="form-group">
+            <label for="taskDueDate">Due Date</label>
+            <input type="date" id="taskDueDate" name="dueDate">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const projectId = '<%= projectId %>';
+    const user = getUser();
+    let project = null;
+
+    const loadProjectDetails = async () => {
+      try {
+        project = await api.getProject(projectId);
+        
+        // Update header
+        document.getElementById('projectTitle').textContent = project.title;
+        document.getElementById('projectTitle2').textContent = project.title;
+        document.getElementById('projectStatus').innerHTML = `<span class="badge badge-${project.status.toLowerCase()}">${project.status}</span>`;
+
+        // Update info
+        document.getElementById('projectDesc').textContent = project.description || 'No description';
+        document.getElementById('projectCreated').textContent = formatDate(project.createdAt);
+        document.getElementById('projectCreatedBy').textContent = project.createdBy?.name || 'Unknown';
+
+        // Set edit link
+        document.getElementById('editBtn').href = `/project/${projectId}/edit`;
+
+        // Load tasks
+        loadTasks(project.tasks || []);
+
+        // Load members
+        loadMembers(project.members || []);
+
+      } catch (error) {
+        showError(error);
+      }
+    };
+
+    const loadTasks = (tasks) => {
+      const tbody = document.getElementById('tasksBody');
+      
+      if (tasks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No tasks yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = tasks.map(task => `
+        <tr>
+          <td><strong>${task.title}</strong></td>
+          <td><span class="badge badge-${task.status.toLowerCase()}">${task.status}</span></td>
+          <td>${task.assignedTo?.name || 'Unassigned'}</td>
+          <td>${task.dueDate ? formatDate(task.dueDate) : 'No due date'}</td>
+          <td>
+            <a href="/task/${task._id}" class="btn btn-xs btn-primary">View</a>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    const loadMembers = (members) => {
+      const container = document.getElementById('membersContainer');
+
+      if (members.length === 0) {
+        container.innerHTML = '<p>No members yet</p>';
+        return;
+      }
+
+      container.innerHTML = members.map(member => `
+        <div class="member-card">
+          <div class="avatar">${getInitials(member.name)}</div>
+          <strong>${member.name}</strong>
+          <small>${member.email}</small>
+          <p class="role-badge">${member.role}</p>
+          <% if (user.role === 'Admin' || user.role === 'Manager') { %>
+            <button class="btn btn-xs btn-danger remove-member" data-id="${member._id}">Remove</button>
+          <% } %>
+        </div>
+      `).join('');
+
+      // Add remove member listeners
+      document.querySelectorAll('.remove-member').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          if (confirm('Remove this member?')) {
+            try {
+              await api.removeProjectMember(projectId, btn.dataset.id);
+              loadProjectDetails();
+            } catch (error) {
+              showError(error);
+            }
+          }
+        });
+      });
+    };
+
+    // Delete project
+    document.getElementById('deleteBtn')?.addEventListener('click', async () => {
+      if (confirm('Delete this project? This cannot be undone.')) {
+        try {
+          await api.deleteProject(projectId);
+          showAlert('Project deleted!', 'success');
+          setTimeout(() => {
+            window.location.href = '/projects';
+          }, 1000);
+        } catch (error) {
+          showError(error);
+        }
+      }
+    });
+
+    // Create task modal handlers
+    const taskModal = document.getElementById('taskModal');
+    document.getElementById('createTaskBtn')?.addEventListener('click', () => {
+      // Populate members dropdown
+      const select = document.getElementById('taskAssigned');
+      select.innerHTML = project.members.map(m => 
+        `<option value="${m._id}">${m.name}</option>`
+      ).join('');
+      taskModal.style.display = 'flex';
+    });
+
+    document.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => taskModal.style.display = 'none');
+    });
+
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const formData = new FormData(e.target);
+        await api.createTask({
+          title: formData.get('title'),
+          description: formData.get('description'),
+          projectId: projectId,
+          assignedTo: formData.get('assignedTo'),
+          dueDate: formData.get('dueDate')
+        });
+        taskModal.style.display = 'none';
+        loadProjectDetails();
+      } catch (error) {
+        showError(error);
+      }
+    });
+
+    loadProjectDetails();
+  </script>
+</body>
+</html>
