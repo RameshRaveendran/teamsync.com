@@ -3,14 +3,9 @@
 // ============================================
 
 const renderDashboard = (req, res) => {
-  // Get user from session/JWT (will be passed via locals)
-  const user = req.user || res.locals.user;
-  
-  if (!user) {
-    return res.redirect('/login');
-  }
-
-  res.render('pages/dashboard', { user });
+  // Frontend handles authentication via JWT in localStorage
+  // Just render the page
+  res.render('pages/dashboard');
 };
 
 module.exports = {

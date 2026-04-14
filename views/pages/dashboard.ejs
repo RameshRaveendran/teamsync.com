@@ -16,7 +16,7 @@
       <div class="content">
         <div class="page-header">
           <h1>📊 Dashboard</h1>
-          <p>Welcome back, <%= user.name %>!</p>
+          <p>Welcome back, <span id="userName">User</span>!</p>
         </div>
 
         <!-- Stats Cards -->
@@ -49,7 +49,7 @@
             <div class="stat-icon">👥</div>
             <div class="stat-info">
               <p class="stat-label">Your Role</p>
-              <h3 class="stat-number role-badge"><%= user.role %></h3>
+              <h3 class="stat-number role-badge" id="userRole">--</h3>
             </div>
           </div>
         </div>
@@ -58,9 +58,7 @@
         <div class="dashboard-section">
           <div class="section-header">
             <h2>🚀 Recent Projects</h2>
-            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
-              <a href="/project/create" class="btn btn-sm btn-primary">+ New Project</a>
-            <% } %>
+            <a href="/project/create" class="btn btn-sm btn-primary" id="createProjectBtn" style="display: none;">+ New Project</a>
           </div>
 
           <div id="recentProjects" class="projects-grid">
@@ -108,6 +106,20 @@
     const user = getUser();
     if (!user) window.location.href = '/login';
 
+    // Initialize navbar
+    initializeNavbar('Dashboard');
+
+    // Set user name in header
+    document.getElementById('userName').textContent = user.name || 'User';
+    
+    // Set user role
+    document.getElementById('userRole').textContent = user.role || 'Member';
+
+    // Show create project button for Admin and Manager
+    if (user.role === 'Admin' || user.role === 'Manager') {
+      document.getElementById('createProjectBtn').style.display = 'block';
+    }
+
     const loadDashboard = async () => {
       try {
         // Load stats
@@ -136,12 +148,11 @@
       const recent = projects.slice(0, 3);
 
       if (recent.length === 0) {
+        const isManagerOrAdmin = user.role === 'Admin' || user.role === 'Manager';
         container.innerHTML = `
           <div class="empty-state">
             <p>No projects yet</p>
-            <% if (user.role === 'Admin' || user.role === 'Manager') { %>
-              <a href="/project/create" class="btn btn-sm btn-primary">Create First Project</a>
-            <% } %>
+            ${isManagerOrAdmin ? '<a href="/project/create" class="btn btn-sm btn-primary">Create First Project</a>' : ''}
           </div>
         `;
         return;

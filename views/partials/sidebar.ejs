@@ -7,27 +7,27 @@
 
     <ul class="sidebar-menu">
       <li>
-        <a href="/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+        <a href="/dashboard" class="sidebar-link" data-page="dashboard">
           📊 Dashboard
         </a>
       </li>
       <li>
-        <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">
+        <a href="/projects" class="sidebar-link" data-page="projects">
           📁 Projects
         </a>
       </li>
       <li>
-        <a href="/tasks" class="<%= currentPage === 'tasks' ? 'active' : '' %>">
+        <a href="/tasks" class="sidebar-link" data-page="tasks">
           ✓ My Tasks
         </a>
       </li>
       <li>
-        <a href="/notifications" class="<%= currentPage === 'notifications' ? 'active' : '' %>">
+        <a href="/notifications" class="sidebar-link" data-page="notifications">
           🔔 Notifications
         </a>
       </li>
       <li>
-        <a href="/profile" class="<%= currentPage === 'profile' ? 'active' : '' %>">
+        <a href="/profile" class="sidebar-link" data-page="profile">
           👤 Profile
         </a>
       </li>
@@ -42,6 +42,26 @@
     </button>
   </div>
 </div>
+
+<script>
+  // Highlight active sidebar link
+  function setActiveSidebarLink() {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.sidebar-link');
+    
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      if (currentPath === href || currentPath.startsWith(href + '/')) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+  
+  // Run on page load
+  setActiveSidebarLink();
+</script>
 
 <script>
   function logout() {

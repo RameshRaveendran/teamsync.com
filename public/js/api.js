@@ -358,3 +358,33 @@ function redirectIfAuth() {
     window.location.href = '/dashboard';
   }
 }
+
+function initializeNavbar(pageTitle = 'Dashboard') {
+  // Update page title in navbar
+  const navPageTitleEl = document.getElementById('navPageTitle');
+  if (navPageTitleEl) {
+    navPageTitleEl.textContent = pageTitle;
+  }
+
+  // Get user from localStorage
+  const user = getUser();
+  if (!user) return;
+
+  // Update navbar with user data
+  const navUserNameEl = document.getElementById('navUserName');
+  if (navUserNameEl) {
+    navUserNameEl.textContent = user.name || 'User';
+  }
+
+  const navUserRoleEl = document.getElementById('navUserRole');
+  if (navUserRoleEl) {
+    const roleDisplay = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member';
+    navUserRoleEl.textContent = roleDisplay;
+  }
+
+  const navUserInitialsEl = document.getElementById('navUserInitials');
+  if (navUserInitialsEl) {
+    const initials = user.name.split(' ').map(n => n[0]).toUpperCase().join('');
+    navUserInitialsEl.textContent = initials || 'U';
+  }
+}

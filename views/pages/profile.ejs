@@ -23,22 +23,22 @@
         <div class="profile-container">
           <div class="profile-card">
             <div class="profile-avatar">
-              <div class="avatar-large"><%= initials %></div>
+              <div class="avatar-large" id="avatarInitials">--</div>
             </div>
 
             <div class="profile-info">
-              <h2 id="userName"><%= user.name %></h2>
-              <p id="userEmail" class="text-muted"><%= user.email %></p>
-              <p class="role-badge"><%= user.role %></p>
+              <h2 id="profileUserName">Loading...</h2>
+              <p id="profileUserEmail" class="text-muted">email@example.com</p>
+              <p class="role-badge" id="profileUserRole">--</p>
 
               <div class="profile-stats">
                 <div class="stat">
                   <span class="stat-label">Member Since</span>
-                  <span class="stat-value"><%= joinDate %></span>
+                  <span class="stat-value" id="memberSince">--</span>
                 </div>
                 <div class="stat">
                   <span class="stat-label">Email</span>
-                  <span class="stat-value"><%= user.email %></span>
+                  <span class="stat-value" id="emailDisplay">email@example.com</span>
                 </div>
               </div>
 
@@ -54,12 +54,12 @@
             <form id="profileForm">
               <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" id="name" value="<%= user.name %>" required>
+                <input type="text" id="name" required>
               </div>
 
               <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" value="<%= user.email %>" required>
+                <input type="email" id="email" required>
               </div>
 
               <div class="form-actions">
@@ -104,6 +104,26 @@
 
     const user = getUser();
     if (!user) window.location.href = '/login';
+
+    // Initialize navbar
+    initializeNavbar('Profile');
+
+    // Populate user information
+    const initials = user.name.split(' ').map(n => n[0]).toUpperCase().join('');
+    document.getElementById('avatarInitials').textContent = initials;
+    document.getElementById('profileUserName').textContent = user.name;
+    document.getElementById('profileUserEmail').textContent = user.email;
+    document.getElementById('profileUserRole').textContent = user.role;
+    document.getElementById('emailDisplay').textContent = user.email;
+    
+    // Format and display member since date
+    const createdDate = new Date(user.createdAt);
+    const memberSince = createdDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('memberSince').textContent = memberSince;
+
+    // Populate form fields
+    document.getElementById('name').value = user.name;
+    document.getElementById('email').value = user.email;
 
     const toggleEdit = () => {
       document.getElementById('editForm').style.display = 

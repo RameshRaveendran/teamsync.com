@@ -77,6 +77,8 @@
     requireAuth();
 
     const user = getUser();
+    initializeNavbar('Create Project');
+    
     if (user.role !== 'Admin' && user.role !== 'Manager') {
       window.location.href = '/projects';
     }
