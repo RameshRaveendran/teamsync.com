@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('../partials/sidebar') %>
+    
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+      
+      <div class="content">
+        <div class="page-header">
+          <h1>🔔 Notifications</h1>
+          <p>Stay updated with TeamSync</p>
+        </div>
+
+        <div class="notifications-controls">
+          <button id="markAllRead" class="btn btn-sm btn-secondary">Mark All as Read</button>
+          <select id="filterNotifications">
+            <option value="">All Notifications</option>
+            <option value="read">Read</option>
+            <option value="unread">Unread</option>
+          </select>
+        </div>
+
+        <div id="notificationsContainer" class="notifications-list">
+          <p>Loading notifications...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    requireAuth();
+
+    let allNotifications = [];
+
+    const loadNotifications = async () => {
+      try {
+        allNotifications = await api.getNotifications();
+        displayNotifications(allNotifications);
+      } catch (error) {
+        showError(error);
+      }
+    };
+
+    const displayNotifications = (notifications) => {
+      const container = document.getElementById('notificationsContainer');
+
+      if (notifications.length === 0) {
+        container.innerHTML = '<p class="text-center">No notifications</p>';
+        return;
+      }
+
+      container.innerHTML = notifications.map(notif => `
+        <div class="notification-item ${!notif.read ? 'unread' : ''}">
+          <div class="notification-icon">
+            ${getNotificationIcon(notif.type)}
+          </div>
+          <div class="notification-content">
+            <h4>${notif.title}</h4>
+            <p>${notif.message}</p>
+            <small>${formatDate(notif.createdAt)}</small>
+          </div>
+          <div class="notification-actions">
+            ${!notif.read ? `<button class="btn btn-xs btn-primary mark-read" data-id="${notif._id}">Mark Read</button>` : ''}
+            <button class="btn btn-xs btn-danger delete-notif" data-id="${notif._id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Attach event listeners
+      document.querySelectorAll('.mark-read').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await api.markNotificationRead(btn.dataset.id);
+            loadNotifications();
+          } catch (error) {
+            showError(error);
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-notif').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await api.deleteNotification(btn.dataset.id);
+            loadNotifications();
+          } catch (error) {
+            showError(error);
+          }
+        });
+      });
+    };
+
+    const getNotificationIcon = (type) => {
+      const icons = {
+        'Task Assignment': '✓',
+        'Project Invite': '📁',
+        'Comment': '💬',
+        'Task Update': '📝',
+        'Other': '🔔'
+      };
+      return icons[type] || '🔔';
+    };
+
+    // Mark all as read
+    document.getElementById('markAllRead').addEventListener('click', async () => {
+      try {
+        const unreadIds = allNotifications
+          .filter(n => !n.read)
+          .map(n => n._id);
+        
+        for (const id of unreadIds) {
+          await api.markNotificationRead(id);
+        }
+        loadNotifications();
+      } catch (error) {
+        showError(error);
+      }
+    });
+
+    // Filter
+    document.getElementById('filterNotifications').addEventListener('change', (e) => {
+      const filter = e.target.value;
+      let filtered = allNotifications;
+
+      if (filter === 'read') filtered = filtered.filter(n => n.read);
+      if (filter === 'unread') filtered = filtered.filter(n => !n.read);
+
+      displayNotifications(filtered);
+    });
+
+    loadNotifications();
+
+    // Auto-reload every 30 seconds
+    setInterval(loadNotifications, 30000);
+  </script>
+
+  <style>
+    .notifications-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .notifications-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .notification-item {
+      display: flex;
+      gap: 15px;
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border-left: 4px solid #ddd;
+      transition: all 0.2s;
+      align-items: center;
+    }
+
+    .notification-item.unread {
+      background: #f0f7ff;
+      border-left-color: #007bff;
+    }
+
+    .notification-icon {
+      font-size: 24px;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .notification-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notification-content h4 {
+      margin: 0 0 5px 0;
+      font-size: 14px;
+    }
+
+    .notification-content p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .notification-content small {
+      color: #999;
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 8px;
+      white-space: nowrap;
+    }
+  </style>
+</body>
+</html>

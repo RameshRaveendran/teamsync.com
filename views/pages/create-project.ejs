@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Project - TeamSync</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <%- include('../partials/sidebar') %>
+    
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+      
+      <div class="content">
+        <div class="breadcrumb">
+          <a href="/projects">Projects</a> / <span>Create New Project</span>
+        </div>
+
+        <div class="page-header">
+          <h1>✨ Create New Project</h1>
+          <p>Set up a new project for your team</p>
+        </div>
+
+        <div class="form-container">
+          <form id="createProjectForm">
+            <div class="form-group">
+              <label for="title">Project Title</label>
+              <input type="text" id="title" name="title" placeholder="Enter project name" required>
+              <small>Give your project a clear, descriptive name</small>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" name="description" placeholder="Describe the project..." rows="4"></textarea>
+              <small>What is this project about?</small>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                  <option value="Active">Active</option>
+                  <option value="Planning">Planning</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" name="startDate">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="members">Add Team Members</label>
+              <div id="membersSelector">
+                <p>Loading users...</p>
+              </div>
+              <small>Select team members to add to this project</small>
+            </div>
+
+            <div class="form-actions">
+              <a href="/projects" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary btn-lg">Create Project</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const user = getUser();
+    if (user.role !== 'Admin' && user.role !== 'Manager') {
+      window.location.href = '/projects';
+    }
+
+    let allUsers = [];
+
+    const loadUsers = async () => {
+      try {
+        // You'll need to add getUsers endpoint to api.js
+        const response = await fetch('/api/users', {
+          headers: {
+            'Authorization': `Bearer ${api.getToken()}`
+          }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load users');
+        allUsers = await response.json();
+
+        const selector = document.getElementById('membersSelector');
+        selector.innerHTML = allUsers
+          .filter(u => u._id !== user._id)
+          .map(u => `
+            <label class="checkbox-item">
+              <input type="checkbox" value="${u._id}" class="user-checkbox">
+              <span>${u.name} (${u.email})</span>
+            </label>
+          `).join('');
+
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('membersSelector').innerHTML = '<p>Could not load users</p>';
+      }
+    };
+
+    document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        showLoading(e.target.querySelector('button[type="submit"]'));
+
+        const selectedMembers = Array.from(document.querySelectorAll('.user-checkbox:checked'))
+          .map(el => el.value);
+
+        const projectData = {
+          title: document.getElementById('title').value,
+          description: document.getElementById('description').value,
+          status: document.getElementById('status').value,
+          members: selectedMembers
+        };
+
+        if (document.getElementById('startDate').value) {
+          projectData.startDate = document.getElementById('startDate').value;
+        }
+
+        const response = await api.createProject(projectData);
+        showAlert('Project created successfully!', 'success');
+
+        setTimeout(() => {
+          window.location.href = `/project/${response._id}`;
+        }, 1000);
+
+      } catch (error) {
+        showError(error);
+        hideLoading(e.target.querySelector('button[type="submit"]'));
+      }
+    });
+
+    loadUsers();
+  </script>
+
+  <style>
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 600px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .checkbox-item:hover {
+      background: #f0f0f0;
+    }
+
+    .checkbox-item input {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    #membersSelector {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+      justify-content: flex-end;
+    }
+  </style>
+</body>
+</html>

@@ -48,6 +48,10 @@ class APIService {
     localStorage.setItem('token', token);
   }
 
+  getToken() {
+    return this.token || localStorage.getItem('token');
+  }
+
   clearToken() {
     this.token = null;
     localStorage.removeItem('token');
@@ -75,10 +79,10 @@ class APIService {
   // 🔹 PROJECT ENDPOINTS
   // ============================================
 
-  createProject(title, description) {
+  createProject(data) {
     return this.request('/projects', {
       method: 'POST',
-      body: JSON.stringify({ title, description })
+      body: JSON.stringify(data)
     });
   }
 
@@ -86,14 +90,18 @@ class APIService {
     return this.request('/projects', { method: 'GET' });
   }
 
+  getProject(id) {
+    return this.request(`/projects/${id}`, { method: 'GET' });
+  }
+
   getProjectById(id) {
     return this.request(`/projects/${id}`, { method: 'GET' });
   }
 
-  updateProject(id, title, description) {
+  updateProject(id, data) {
     return this.request(`/projects/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ title, description })
+      body: JSON.stringify(data)
     });
   }
 
@@ -111,6 +119,10 @@ class APIService {
     });
   }
 
+  removeProjectMember(projectId, userId) {
+    return this.removeMember(projectId, userId);
+  }
+
   deleteProject(id) {
     return this.request(`/projects/${id}`, { method: 'DELETE' });
   }
@@ -119,21 +131,36 @@ class APIService {
   // 🔹 TASK ENDPOINTS
   // ============================================
 
-  createTask(title, projectId, assignedTo) {
+  createTask(data) {
     return this.request('/tasks', {
       method: 'POST',
-      body: JSON.stringify({ title, projectId, assignedTo })
+      body: JSON.stringify(data)
     });
   }
 
-  getTasks(projectId) {
-    return this.request(`/tasks/${projectId}`, { method: 'GET' });
+  getTasks() {
+    return this.request('/tasks', { method: 'GET' });
+  }
+
+  getTask(id) {
+    return this.request(`/tasks/${id}`, { method: 'GET' });
+  }
+
+  getTasksByProject(projectId) {
+    return this.request(`/tasks/project/${projectId}`, { method: 'GET' });
   }
 
   updateTaskStatus(id, status) {
     return this.request(`/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ status })
+    });
+  }
+
+  updateTask(id, data) {
+    return this.request(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
     });
   }
 
@@ -164,8 +191,12 @@ class APIService {
     return this.request('/notifications', { method: 'GET' });
   }
 
-  markNotificationAsRead(id) {
+  markNotificationRead(id) {
     return this.request(`/notifications/${id}/read`, { method: 'PUT' });
+  }
+
+  markNotificationAsRead(id) {
+    return this.markNotificationRead(id);
   }
 
   markAllAsRead() {
@@ -174,6 +205,11 @@ class APIService {
 
   deleteNotification(id) {
     return this.request(`/notifications/${id}`, { method: 'DELETE' });
+  }
+
+  logout() {
+    this.clearToken();
+    removeUser();
   }
 }
 
