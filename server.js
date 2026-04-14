@@ -54,6 +54,7 @@ const authRoutes = require("./routes/authRoutes"); // Auth (login/register)
 const projectRoutes = require("./routes/projectRoutes"); // Projects CRUD
 const taskRoutes = require("./routes/taskRoutes"); // Tasks CRUD
 const commentRoutes = require("./routes/commentRoutes"); // Comments system
+const notificationRoutes = require("./routes/notificationRoutes"); // Notifications
 const errorHandler = require("./middleware/errorMiddleware"); // Error handling
 
 // ======================
@@ -81,6 +82,8 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
 app.use("/api/comments", commentRoutes);
+
+app.use("/api/notifications", notificationRoutes);
 
 // ======================
 // 🔹 HEALTH CHECK ROUTE
