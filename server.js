@@ -4,6 +4,7 @@
 const http = require("http");
 const express = require("express"); // Framework → server create ചെയ്യാൻ
 const dotenv = require("dotenv"); // Environment variables load ചെയ്യാൻ
+const path = require("path"); // File paths
 const connectDB = require("./config/db"); // Database connection function
 const { Server } = require("socket.io");
 
@@ -21,6 +22,12 @@ connectDB(); // MongoDB connect ചെയ്യുന്നു
 // 🔹 APP INIT
 // ======================
 const app = express(); // Express server instance create ചെയ്യുന്നു
+
+// ======================
+// 🔹 EJS VIEW ENGINE SETUP
+// ======================
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // ======================
 // 🔹 SOCKET.IO UPDATES
@@ -48,6 +55,11 @@ io.on("connection", (socket) => {
 });
 
 // ======================
+// 🔹 STATIC FILES MIDDLEWARE
+// ======================
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ======================
 // 🔹 ROUTE MODULES
 // ======================
 const authRoutes = require("./routes/authRoutes"); // Auth (login/register)
@@ -55,6 +67,7 @@ const projectRoutes = require("./routes/projectRoutes"); // Projects CRUD
 const taskRoutes = require("./routes/taskRoutes"); // Tasks CRUD
 const commentRoutes = require("./routes/commentRoutes"); // Comments system
 const notificationRoutes = require("./routes/notificationRoutes"); // Notifications
+const frontendRoutes = require("./routes/frontend"); // Frontend pages
 const errorHandler = require("./middleware/errorMiddleware"); // Error handling
 
 // ======================
@@ -73,6 +86,11 @@ app.use((req, res, next) => {
 // ======================
 // 🔹 ROUTE MOUNTING
 // ======================
+
+// Frontend Routes (HTML pages - must be before API routes)
+app.use(frontendRoutes);
+
+// API Routes (JSON responses)
 app.use("/api/auth", authRoutes);
 // Example: /api/auth/login
 
@@ -88,7 +106,7 @@ app.use("/api/notifications", notificationRoutes);
 // ======================
 // 🔹 HEALTH CHECK ROUTE
 // ======================
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.send("TeamSync API Running");
 });
 // Server working ആണോ എന്ന് test ചെയ്യാൻ
