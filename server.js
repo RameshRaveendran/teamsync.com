@@ -37,20 +37,13 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // ✅ NEW: Join task room
-  socket.on("joinTask", (taskId) => {
-    console.log(`User ${socket.id} joined task room: task-${taskId}`);
-    socket.join(`task-${taskId}`); 
-  });
-
-  // ✅ NEW: Leave task room
-  socket.on("leaveTask", (taskId) => {
-    console.log(`User ${socket.id} left task room: task-${taskId}`);
-    socket.leave(`task-${taskId}`);
+  socket.on("joinProject", (projectId) => {
+    socket.join(projectId);
+    console.log(`Joined room: ${projectId}`);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("User disconnected");
   });
 });
 
